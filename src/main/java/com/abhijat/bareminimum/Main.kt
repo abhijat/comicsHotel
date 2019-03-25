@@ -22,8 +22,6 @@ data class RangeQuery<T : Comparable<T>>(val queryType: RangeQuery.Type, val ran
     }
 }
 
-data class PersonQuery(val queryType: String, val person: Person, val testFunc: (Person) -> Boolean) : Query<Boolean>()
-
 inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Query<T>): Boolean {
     when (q) {
         is ScalarQuery -> {
@@ -40,10 +38,6 @@ inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Que
                 RangeQuery.Type.OutsideRange -> outsideRange(p, f, q.range)
             }
         }
-
-        is PersonQuery -> {
-            return q.testFunc(q.person)
-        }
     }
 }
 
@@ -51,12 +45,11 @@ inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Que
 fun main() {
     val me = Person(age = 35.5, name = "abhijat")
 
-    println(runQuery(me, "age", ScalarQuery(ScalarQuery.Type.EqualTo, 35.5)))
+    println(runQuery(me, "age", ScalarQuery(ScalarQuery.Type.EqualTo, 35.0)))
     println(runQuery(me, "age", ScalarQuery(ScalarQuery.Type.LessThanOrEqualTo, 200.0)))
 
     println(runQuery(me, "age", RangeQuery(RangeQuery.Type.WithinRange, 0.0..100.0)))
     println(runQuery(me, "age", RangeQuery(RangeQuery.Type.OutsideRange, 0.0..100.0)))
-    println(runQuery(me, "age", PersonQuery("", me) { it.name.startsWith("a") }))
 }
 
 
