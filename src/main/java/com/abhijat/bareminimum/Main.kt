@@ -68,14 +68,14 @@ inline fun <P : DomainType, reified Q : Comparable<Q>> isEqualTo(domainObject: P
     return get<P, Q>(domainObject, fieldName) == query
 }
 
+inline fun <P : DomainType, reified Q : Comparable<Q>> greaterThanOrEqualTo(domainObject: P, fieldName: String, query: Q): Boolean {
+    return get<P, Q>(domainObject, fieldName) >= query
+}
+
 inline fun <P : DomainType, reified Q : Comparable<Q>> withinRange(a: P, fieldName: String, range: ClosedRange<Q>): Boolean {
     return get(a, fieldName) in range
 }
 
 inline fun <P : DomainType, reified Q : Comparable<Q>> outsideRange(a: P, fieldName: String, range: ClosedRange<Q>): Boolean {
     return get(a, fieldName) !in range
-}
-
-inline fun <P : DomainType, reified Q : Comparable<Q>> greaterThanOrEqualTo(domainObject: P, fieldName: String, query: Q): Boolean {
-    return get<P, Q>(domainObject, fieldName) >= query
 }

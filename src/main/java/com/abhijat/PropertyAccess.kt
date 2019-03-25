@@ -4,7 +4,7 @@ import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
-inline fun <DomainType : Any, reified T : Comparable<T>> get(domainObject: DomainType, fieldName: String): T {
+inline fun <DomainType : Any, reified T> get(domainObject: DomainType, fieldName: String): T {
     val field = domainObject.javaClass
             .kotlin
             .memberProperties
