@@ -1,13 +1,16 @@
 package com.abhijat.bareminimum
 
+import com.abhijat.bareminimum.serialization.QueryDeserializer
 import com.abhijat.get
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 
 sealed class DomainType
 data class Person(val age: Double, val name: String) : DomainType()
 
+@JsonDeserialize(using = QueryDeserializer::class)
 sealed class Query<T : Comparable<T>>
 
-data class ScalarQuery<T : Comparable<T>>(val type: ScalarQuery.Type, val against: T) : Query<T>() {
+data class ScalarQuery<T : Comparable<T>>(val type: Type, val against: T) : Query<T>() {
     enum class Type {
         GreaterThanOrEqualTo,
         LessThanOrEqualTo,
@@ -15,7 +18,7 @@ data class ScalarQuery<T : Comparable<T>>(val type: ScalarQuery.Type, val agains
     }
 }
 
-data class RangeQuery<T : Comparable<T>>(val queryType: RangeQuery.Type, val range: ClosedRange<T>) : Query<T>() {
+data class RangeQuery<T : Comparable<T>>(val queryType: Type, val range: ClosedRange<T>) : Query<T>() {
     enum class Type {
         WithinRange,
         OutsideRange,
@@ -41,6 +44,17 @@ inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Que
     }
 }
 
+inline fun <reified T : Comparable<T>> queryIt(value: T, q: Query<T>): Boolean {
+    when (q) {
+        is RangeQuery -> {
+            return when (q.queryType) {
+                RangeQuery.Type.WithinRange -> value in q.range
+                else -> throw Exception()
+            }
+        }
+        else -> throw Exception()
+    }
+}
 
 fun main() {
     val me = Person(age = 35.5, name = "abhijat")

@@ -1,0 +1,13 @@
+{
+  "query": {
+    "kind": "range",
+    "type": "WithinRange",
+    "against": {
+      "from": 1.11,
+      "to": 100.111
+    },
+    "againstType": "Number"
+  },
+  "objType": "person",
+  "attr": "age"
+}

@@ -1,5 +1,6 @@
 package com.abhijat
 
+import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty1
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
@@ -12,6 +13,16 @@ fun <DomainType : Any, T> get(domainObject: DomainType, fieldName: String): T {
             .first { it.name == fieldName }
 
     return field.get(domainObject)
+}
+
+fun <DomainType : Any, T : Any> getType(domainObject: DomainType, fieldName: String): KClass<T> {
+    val field = domainObject.javaClass
+            .kotlin
+            .memberProperties
+            .first { it.name == fieldName }
+
+    val fieldValue = field.get(domainObject)
+    return fieldValue!!::class as KClass<T>
 }
 
 inline fun <reified DomainType : Any, reified T> get(domainObject: DomainType, fieldName: String, separator: String = "."): T {
