@@ -7,7 +7,7 @@ data class Person(val age: Double, val name: String) : DomainType()
 
 sealed class Query<T : Comparable<T>>
 
-data class ScalarQuery<T : Comparable<T>>(val against: T, val type: ScalarQuery.Type) : Query<T>() {
+data class ScalarQuery<T : Comparable<T>>(val type: ScalarQuery.Type, val against: T) : Query<T>() {
     enum class Type {
         GreaterThanOrEqualTo,
         LessThanOrEqualTo,
@@ -15,7 +15,13 @@ data class ScalarQuery<T : Comparable<T>>(val against: T, val type: ScalarQuery.
     }
 }
 
-data class RangeQuery<T : Comparable<T>>(val queryType: String, val range: ClosedRange<T>) : Query<T>()
+data class RangeQuery<T : Comparable<T>>(val queryType: RangeQuery.Type, val range: ClosedRange<T>) : Query<T>() {
+    enum class Type {
+        WithinRange,
+        OutsideRange,
+    }
+}
+
 data class PersonQuery(val queryType: String, val person: Person, val testFunc: (Person) -> Boolean) : Query<Boolean>()
 
 inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Query<T>): Boolean {
@@ -30,9 +36,8 @@ inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Que
 
         is RangeQuery -> {
             return when (q.queryType) {
-                "inRange" -> withinRange(p, f, q.range)
-                "outsideRange" -> outsideRange(p, f, q.range)
-                else -> throw Exception()
+                RangeQuery.Type.WithinRange -> withinRange(p, f, q.range)
+                RangeQuery.Type.OutsideRange -> outsideRange(p, f, q.range)
             }
         }
 
@@ -46,11 +51,11 @@ inline fun <reified T : Comparable<T>> runQuery(p: DomainType, f: String, q: Que
 fun main() {
     val me = Person(age = 35.5, name = "abhijat")
 
-    println(runQuery(me, "age", ScalarQuery(35.5, ScalarQuery.Type.EqualTo)))
-    println(runQuery(me, "age", ScalarQuery(200.0, ScalarQuery.Type.LessThanOrEqualTo)))
+    println(runQuery(me, "age", ScalarQuery(ScalarQuery.Type.EqualTo, 35.5)))
+    println(runQuery(me, "age", ScalarQuery(ScalarQuery.Type.LessThanOrEqualTo, 200.0)))
 
-    println(runQuery(me, "age", RangeQuery("inRange", 0.0..100.0)))
-    println(runQuery(me, "age", RangeQuery("outsideRange", 0.0..100.0)))
+    println(runQuery(me, "age", RangeQuery(RangeQuery.Type.WithinRange, 0.0..100.0)))
+    println(runQuery(me, "age", RangeQuery(RangeQuery.Type.OutsideRange, 0.0..100.0)))
     println(runQuery(me, "age", PersonQuery("", me) { it.name.startsWith("a") }))
 }
 
